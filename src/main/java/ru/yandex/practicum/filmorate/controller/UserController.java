@@ -36,7 +36,7 @@ public class UserController {
             throw new ValidationException("Электронная почта не может быть пустой и должна содержать символ @");
         }
         if (user.getBirthday().isAfter(LocalDate.now())) {
-            log.error("дата рождения не может быть в будущем");
+            log.error("Дата рождения не может быть в будущем");
             throw new ValidationException("дата рождения не может быть в будущем");
         }
         log.debug("Пользователь сохранен");
@@ -60,7 +60,7 @@ public class UserController {
                 throw new ValidationException("Электронная почта не может быть пустой и должна содержать символ @");
             }
             if (user.getBirthday().isAfter(LocalDate.now())) {
-                log.error("дата рождения не может быть в будущем");
+                log.error("Дата рождения не может быть в будущем");
                 throw new ValidationException("дата рождения не может быть в будущем");
             }
             log.debug("Пользователь изменен");
