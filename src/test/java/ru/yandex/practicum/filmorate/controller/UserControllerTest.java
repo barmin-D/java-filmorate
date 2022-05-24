@@ -4,6 +4,8 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.function.Executable;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import java.time.LocalDate;
 
@@ -14,7 +16,7 @@ class UserControllerTest {
 
     @Test
     void findAll() {
-        UserController userController = new UserController();
+        UserController userController = new UserController(new UserService(new InMemoryUserStorage()));
         User user = new User("tortiss", "Dmitry", "toritss00@yandex.ru",
                 LocalDate.of(1992, 03, 23));
         userController.create(user);
@@ -29,7 +31,7 @@ class UserControllerTest {
                 new Executable() {
                     @Override
                     public void execute() {
-                        UserController userController = new UserController();
+                        UserController userController = new UserController(new UserService(new InMemoryUserStorage()));
                         User user = new User("torti ss", "Dmitry", "toritss00@yandex.ru",
                                 LocalDate.of(1992, 03, 23));
                         userController.create(user);
@@ -45,7 +47,7 @@ class UserControllerTest {
                 new Executable() {
                     @Override
                     public void execute() {
-                        UserController userController = new UserController();
+                        UserController userController = new UserController(new UserService(new InMemoryUserStorage()));
                         User user = new User("", "Dmitry", "toritss00@yandex.ru",
                                 LocalDate.of(1992, 03, 23));
                         userController.create(user);
@@ -61,7 +63,7 @@ class UserControllerTest {
                 new Executable() {
                     @Override
                     public void execute() {
-                        UserController userController = new UserController();
+                        UserController userController = new UserController(new UserService(new InMemoryUserStorage()));
                         User user = new User("tortiss", "Dmitry", "toritss00yandex.ru",
                                 LocalDate.of(1992, 03, 23));
                         userController.create(user);
@@ -78,7 +80,7 @@ class UserControllerTest {
                 new Executable() {
                     @Override
                     public void execute() {
-                        UserController userController = new UserController();
+                        UserController userController = new UserController(new UserService(new InMemoryUserStorage()));
                         User user = new User("tortiss", "Dmitry", "",
                                 LocalDate.of(1992, 03, 23));
                         userController.create(user);
@@ -95,7 +97,7 @@ class UserControllerTest {
                 new Executable() {
                     @Override
                     public void execute() {
-                        UserController userController = new UserController();
+                        UserController userController = new UserController(new UserService(new InMemoryUserStorage()));
                         User user = new User("tortiss", "Dmitry", "tortiss@yandex.ru",
                                 LocalDate.of(2992, 03, 23));
                         userController.create(user);
