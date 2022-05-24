@@ -20,9 +20,9 @@ public class FilmService {
 
 
     @Autowired
-    public FilmService(FilmStorage filmStorage,UserStorage userStorage) {
+    public FilmService(FilmStorage filmStorage, UserStorage userStorage) {
         this.filmStorage = filmStorage;
-        this.userStorage=userStorage;
+        this.userStorage = userStorage;
     }
 
     public FilmStorage getFilmStorage() {
@@ -31,7 +31,7 @@ public class FilmService {
 
     public Film findFilmById(Integer filmId) {
         if (filmStorage.getFilms().containsKey(filmId)) {
-            return  filmStorage.getFilms().get(filmId);
+            return filmStorage.getFilms().get(filmId);
         } else {
             throw new FilmNotFoundException(String.format("Фильм № %d не найден", filmId));
         }
@@ -53,7 +53,7 @@ public class FilmService {
     public void removeLikeFilmById(Integer id, Integer userId) {
         if (filmStorage.getFilms().containsKey(id)) {
             if (userStorage.getUsers().containsKey(userId)) {
-                Film film =  filmStorage.getFilms().get(id);
+                Film film = filmStorage.getFilms().get(id);
                 film.getLike().remove(Long.valueOf(userId));
             } else {
                 throw new UserNotFoundException(String.format("Пользователь %s не найден", userId));
@@ -64,8 +64,8 @@ public class FilmService {
     }
 
     public Collection<Film> getFilmPopularByCount(Integer count) {
-        if (count==null){
-            List<Film> list =  filmStorage.findAll().stream()
+        if (count == null) {
+            List<Film> list = filmStorage.findAll().stream()
                     .sorted(new SizeComparator() {
                         @Override
                         public int compare(Film f1, Film f2) {
@@ -75,7 +75,7 @@ public class FilmService {
                     .limit(10)
                     .collect(Collectors.toList());
             return list;
-        }else {
+        } else {
             List<Film> list = filmStorage.findAll().stream()
                     .sorted(new SizeComparator() {
                         @Override
@@ -88,7 +88,6 @@ public class FilmService {
             return list;
         }
     }
-
 }
 
 abstract class SizeComparator implements Comparator<Film> {
@@ -99,8 +98,7 @@ abstract class SizeComparator implements Comparator<Film> {
         }
         if (f1.getLike().size() < f2.getLike().size()) {
             return 1;
-        }
-        else {
+        } else {
             return -1;
         }
     }

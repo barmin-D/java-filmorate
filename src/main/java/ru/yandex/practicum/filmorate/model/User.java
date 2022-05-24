@@ -14,7 +14,7 @@ public class User {
     private String email;
     private LocalDate birthday;
 
-    private Set<Long> friends=new TreeSet<>();
+    private Set<Long> friends = new TreeSet<>();
 
     public User(String login, String name, String email, LocalDate birthday) {
         this.login = login;
