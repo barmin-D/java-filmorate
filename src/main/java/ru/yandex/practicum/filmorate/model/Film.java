@@ -1,11 +1,13 @@
 package ru.yandex.practicum.filmorate.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import lombok.Data;
-
-
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.util.Set;
+import java.util.TreeSet;
 
 @Data
 public class Film {
@@ -13,11 +15,12 @@ public class Film {
     private String name;
     private String description;
     private LocalDate releaseDate;
+    @JsonFormat(shape = JsonFormat.Shape.NUMBER)
     private Duration duration;
-    private static int idInc=1;
+
+    private Set<Long> like = new TreeSet<>();
 
     public Film(String name, String description, LocalDate releaseDate, Duration duration) {
-        this.id = idInc++;
         this.name = name;
         this.description = description;
         this.releaseDate = releaseDate;

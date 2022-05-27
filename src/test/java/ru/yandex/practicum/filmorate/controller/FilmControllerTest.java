@@ -4,6 +4,11 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.function.Executable;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -15,7 +20,8 @@ class FilmControllerTest {
 
     @Test
     void findAll() {
-        FilmController filmController = new FilmController();
+        FilmController filmController =
+                new FilmController(new FilmService(new InMemoryFilmStorage(), new InMemoryUserStorage()));
         Film film = new Film("Тор", "Новые приключения тора",
                 LocalDate.of(2015, 11, 20), Duration.ofHours(2));
         filmController.create(film);
@@ -30,7 +36,9 @@ class FilmControllerTest {
                 new Executable() {
                     @Override
                     public void execute() {
-                        FilmController filmController = new FilmController();
+                        FilmController filmController =
+                                new FilmController(new FilmService(new InMemoryFilmStorage(),
+                                        new InMemoryUserStorage()));
                         Film film = new Film("", "Новые приключения тора",
                                 LocalDate.of(2015, 11, 20), Duration.ofHours(2));
                         filmController.create(film);
@@ -47,7 +55,9 @@ class FilmControllerTest {
                 new Executable() {
                     @Override
                     public void execute() {
-                        FilmController filmController = new FilmController();
+                        FilmController filmController =
+                                new FilmController(new FilmService(new InMemoryFilmStorage(),
+                                        new InMemoryUserStorage()));
                         Film film = new Film("Tor", "",
                                 LocalDate.of(2015, 11, 20), Duration.ofHours(2));
                         filmController.create(film);
@@ -63,7 +73,9 @@ class FilmControllerTest {
                 new Executable() {
                     @Override
                     public void execute() {
-                        FilmController filmController = new FilmController();
+                        FilmController filmController =
+                                new FilmController(new FilmService(new InMemoryFilmStorage(),
+                                        new InMemoryUserStorage()));
                         Film film = new Film("Tor", "ffffffffffffffffffffffffffffffffffffff" +
                                 "fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff" +
                                 "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff" +
@@ -83,7 +95,9 @@ class FilmControllerTest {
                 new Executable() {
                     @Override
                     public void execute() {
-                        FilmController filmController = new FilmController();
+                        FilmController filmController =
+                                new FilmController(new FilmService(new InMemoryFilmStorage(),
+                                        new InMemoryUserStorage()));
                         Film film = new Film("Tor", "Test",
                                 LocalDate.of(1111, 11, 20), Duration.ofHours(2));
                         filmController.create(film);
@@ -99,7 +113,9 @@ class FilmControllerTest {
                 new Executable() {
                     @Override
                     public void execute() {
-                        FilmController filmController = new FilmController();
+                        FilmController filmController =
+                                new FilmController(new FilmService(new InMemoryFilmStorage(),
+                                        new InMemoryUserStorage()));
                         Film film = new Film("Tor", "Test",
                                 LocalDate.of(2000, 11, 20), Duration.ofHours(-2));
                         filmController.create(film);
