@@ -1,0 +1,43 @@
+table user as U{
+  id int [pk, increment]
+  login varchar
+  name varchar
+  email varchar
+  birthday date
+  friendship int [pk, increment]
+}
+
+table friends{
+  user_id int [ref: > U.id]
+  friend_id int [ref: > U.id]
+}
+
+table film as F{
+  id int [pk, increment]
+  name varchar
+  description varchar
+  releaseDate date
+  duration duration
+  genre_id int [pk, increment]
+  mpa_id int [pk, increment]
+}
+
+table genre {
+  genre_id int [ref: - F.genre_id]
+  name varchar
+}
+
+table mpa{
+  mpa_id int [ref: - F.mpa_id]
+  name varchar
+}
+
+table like{
+  film_id int [ref: > F.id]
+  user_id int [ref: > U.id]
+}
+
+table friendship{
+  friendship_id int [ref: - U.friendship]
+  name varchar
+}

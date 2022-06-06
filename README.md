@@ -1,2 +1,30 @@
-# java-filmorate
-Template repository for Filmorate project.
+
+## Это репозиторий проекта "java-filmorate"
+#### Было сложно, но я справился
+
+Наше приложение **умеет**:
+1. Добавлять пользователя / фильм
+2. Удалять пользователя / фильм
+3. Обновлять пользователя / фильм
+4. Добавлять в друзья пользователей
+5. Ставить лайки фильмам
+6. Получать все(х) фильмы или пользователей
+
+![Схема БД](Схема БД.png)
+
+##### Пояснение 
+##### Запросы:
+
+[Сетевые запросы, протестируйте его с помощью Postman](https://github.com/yandex-praktikum/java-filmorate/blob/add-friends-likes/postman/sprint.json)
+
+Приложение написано на Java. Пример кода:
+```java
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Пришло время практики!");
+    }
+}
+
+```
+------
+О том, как научиться создавать такие приложения, можно узнать в [Яндекс-Практикуме](https://practicum.yandex.ru/java-developer/ "Тут учат Java!") 
