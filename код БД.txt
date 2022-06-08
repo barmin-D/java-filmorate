@@ -4,12 +4,12 @@ table user as U{
   name varchar
   email varchar
   birthday date
-  friendship int [pk, increment]
 }
 
 table friends{
   user_id int [ref: > U.id]
   friend_id int [ref: > U.id]
+  friendship int
 }
 
 table film as F{
@@ -18,12 +18,12 @@ table film as F{
   description varchar
   releaseDate date
   duration duration
-  genre_id int [pk, increment]
-  mpa_id int [pk, increment]
+  genre_id int
+  mpa_id int
 }
 
-table genre {
-  genre_id int [ref: - F.genre_id]
+table genre as G{
+  genre_id int [pk, increment]
   name varchar
 }
 
@@ -32,12 +32,15 @@ table mpa{
   name varchar
 }
 
-table like{
+table film_likes{
   film_id int [ref: > F.id]
   user_id int [ref: > U.id]
 }
 
-table friendship{
-  friendship_id int [ref: - U.friendship]
-  name varchar
+table film_genres{
+  film_id int [ref: > F.id]
+  genre_id int [ref: - G.genre_id]
 }
+
+
+
