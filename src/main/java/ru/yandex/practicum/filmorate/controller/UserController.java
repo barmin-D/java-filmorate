@@ -6,6 +6,7 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.util.Collection;
+import java.util.Optional;
 
 @RestController
 public class UserController {
@@ -32,7 +33,7 @@ public class UserController {
     }
 
     @GetMapping("/users/{userId}")
-    public User findUser(@PathVariable("userId") Integer userId) {
+    public Optional<User> findUser(@PathVariable("userId") Integer userId) {
         return userService.findUserById(userId);
     }
 

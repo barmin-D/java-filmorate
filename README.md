@@ -18,7 +18,7 @@
 [Сетевые запросы, протестируйте его с помощью Postman](https://github.com/yandex-praktikum/java-filmorate/blob/add-friends-likes/postman/sprint.json)
 ##### Пояснение:
 ##### [SQL](код%20БД.txt)
-##### [запросы SQL](Примеры%20запросов.txt)
+##### [запросы SQL](\src\main\resources\schema.sql)
 
 Приложение написано на Java. Пример кода:
 ```java

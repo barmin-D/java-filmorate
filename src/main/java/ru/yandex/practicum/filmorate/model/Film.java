@@ -1,29 +1,32 @@
 package ru.yandex.practicum.filmorate.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-
+import lombok.Builder;
 import lombok.Data;
 
-import java.time.Duration;
 import java.time.LocalDate;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.Collection;
 
 @Data
+@Builder
 public class Film {
     private int id;
     private String name;
-    private String description;
     private LocalDate releaseDate;
-    @JsonFormat(shape = JsonFormat.Shape.NUMBER)
-    private Duration duration;
+    private String description;
+    private Integer duration;
+    private Integer rate;
+    private Mpa mpa;
+    private Collection<Genre> genres;
 
-    private Set<Long> like = new TreeSet<>();
-
-    public Film(String name, String description, LocalDate releaseDate, Duration duration) {
+    public Film(int id, String name, LocalDate releaseDate, String description, Integer duration, Integer rate,
+                Mpa mpa, Collection<Genre> genres) {
+        this.id = id;
         this.name = name;
-        this.description = description;
         this.releaseDate = releaseDate;
+        this.description = description;
         this.duration = duration;
+        this.rate = rate;
+        this.mpa = mpa;
+        this.genres = genres;
     }
 }

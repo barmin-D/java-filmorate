@@ -6,6 +6,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.util.Collection;
+import java.util.Optional;
 
 @RestController
 public class FilmController {
@@ -32,7 +33,7 @@ public class FilmController {
     }
 
     @GetMapping("/films/{filmId}")
-    public Film findFilm(@PathVariable("filmId") Integer filmId) {
+    public Optional<Film> findFilm(@PathVariable("filmId") Integer filmId) {
         return filmService.findFilmById(filmId);
     }
 
