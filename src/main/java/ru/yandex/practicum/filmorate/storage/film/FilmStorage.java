@@ -16,9 +16,9 @@ public interface FilmStorage {
 
     Film update(Film film);
 
-    Optional<Film> findFilmById(Integer filmId);
+    Optional<Film> getFilmById(Integer filmId);
 
-    void findLikeFilmById(Integer id, Integer userId);
+    void putLikeFilmById(Integer id, Integer userId);
 
     void removeLikeFilmById(Integer id, Integer userId);
 

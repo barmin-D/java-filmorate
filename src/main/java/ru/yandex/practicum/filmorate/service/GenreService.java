@@ -17,8 +17,8 @@ public class GenreService {
         this.genreStorage = genreStorage;
     }
 
-    public Optional<Genre> findGenreById(Integer genreId) {
-        return genreStorage.findGenreById(genreId);
+    public Optional<Genre> getGenreById(Integer genreId) {
+        return genreStorage.getGenreById(genreId);
     }
 
     public Collection<Genre> findAllGenres() {

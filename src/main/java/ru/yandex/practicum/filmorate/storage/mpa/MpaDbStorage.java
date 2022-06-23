@@ -17,6 +17,8 @@ import java.util.Optional;
 public class MpaDbStorage implements MpaStorage {
     private final JdbcTemplate jdbcTemplate;
     private final Logger log = LoggerFactory.getLogger(MpaDbStorage.class);
+    private final String MPA_REQUEST_SQL = "SELECT * FROM MPA WHERE id = ?";
+    private final String MPA_ALL = "select * from MPA";
 
     public MpaDbStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -24,18 +26,17 @@ public class MpaDbStorage implements MpaStorage {
 
     @Override
     public Collection<Mpa> findAllMpa() {
-        String sql = "select * from MPA";
-        return jdbcTemplate.query(sql, this::makeMpa);
+
+        return jdbcTemplate.query(MPA_ALL, this::makeMpa);
     }
 
     @Override
-    public Optional<Mpa> findMpaById(Integer mpaId) {
-        SqlRowSet mpaRows = jdbcTemplate.queryForRowSet("SELECT * FROM GENRES WHERE id = ?", mpaId);
+    public Optional<Mpa> getMpaById(Integer mpaId) {
+        SqlRowSet mpaRows = jdbcTemplate.queryForRowSet(MPA_REQUEST_SQL, mpaId);
         if (mpaRows.next()) {
-            String sql = "SELECT * FROM MPA WHERE id = ?";
-            return Optional.of(jdbcTemplate.queryForObject(sql, this::makeMpa, mpaId));
+            return Optional.of(jdbcTemplate.queryForObject(MPA_REQUEST_SQL, this::makeMpa, mpaId));
         } else {
-            log.info("Рейтинг фильма  с идентификатором {} не найден.", mpaId);
+            log.error("Рейтинг фильма  с идентификатором {} не найден.", mpaId);
             throw new FilmNotFoundException("Такого рейтинга нет");
         }
     }

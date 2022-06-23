@@ -7,21 +7,18 @@ import ru.yandex.practicum.filmorate.controller.FilmController;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 @Component("InMemoryFilmStorage")
-public class InMemoryFilmStorage implements FilmStorage {
+public abstract class InMemoryFilmStorage implements FilmStorage {
     private static int idCounter = 1;
-    private final LocalDate LOCAL_DATA_START = LocalDate.of(1895, 12, 28);
+    private final LocalDate DATE_FIRST_MOVIE = LocalDate.of(1895, 12, 28);
     private static final Logger log = LoggerFactory.getLogger(FilmController.class);
     private Map<Integer, Film> films = new HashMap<>();
-
 
     public static int getIdCounter() {
         return idCounter++;
@@ -39,22 +36,7 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film create(Film film) {
-        if (film.getName().length() == 0) {
-            log.error("Запись фильма не удалась, пустое название");
-            throw new ValidationException("Название не может быть пустым");
-        }
-        if (film.getDescription().length() <= 0 || film.getDescription().length() >= 200) {
-            log.error("Запись фильма не удалась, превышен лимит символов");
-            throw new ValidationException("Максимальная длина описания — 200 символов");
-        }
-        if (film.getReleaseDate().isBefore(LOCAL_DATA_START)) {
-            log.error("Запись фильма не удалась, дата релиза до 28-12-1895 ");
-            throw new ValidationException("Дата релиза — не раньше 28 декабря 1895 года");
-        }
-        if (film.getDuration() < 0) {
-            log.error("Запись фильма не удалась, отрицательная продолжительность фильма");
-            throw new ValidationException("Продолжительность фильма должна быть положительной");
-        }
+        validateFilm(film);
         film.setId(getIdCounter());
         log.debug("фильм записан");
         films.put(film.getId(), film);
@@ -64,23 +46,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public Film update(Film film) {
         if (films.containsKey(film.getId())) {
-            if (film.getName().length() == 0) {
-                log.error("Запись фильма не удалась, пустое название");
-                throw new ValidationException("Название не может быть пустым");
-            }
-            if (film.getDescription().length() > 200) {
-                log.error("Запись фильма не удалась, превышен лимит символов");
-                throw new ValidationException("Максимальная длина описания — 200 символов");
-            }
-            LocalDate localDate = LocalDate.of(1895, 12, 28);
-            if (film.getReleaseDate().isBefore(localDate)) {
-                log.error("Запись фильма не удалась, дата релиза до 28-12-1895 ");
-                throw new ValidationException("Дата релиза — не раньше 28 декабря 1895 года");
-            }
-            if (film.getDuration() < 0) {
-                log.error("Запись фильма не удалась, отрицательная продолжительность фильма");
-                throw new ValidationException("Продолжительность фильма должна быть положительной");
-            }
+            validateFilm(film);
             log.debug("фильм перезаписан");
             films.put(film.getId(), film);
         } else {
@@ -89,26 +55,28 @@ public class InMemoryFilmStorage implements FilmStorage {
         return film;
     }
 
-    @Override
-    public Optional<Film> findFilmById(Integer filmId) {
-        if (getFilms().containsKey(filmId)) {
-            return Optional.ofNullable(getFilms().get(filmId));
-        } else {
-            throw new FilmNotFoundException(String.format("Фильм № %d не найден", filmId));
+    private Film validateFilm(Film film) {
+        if (film.getName().length() == 0) {
+            log.error("Запись фильма не удалась, пустое название");
+            throw new ValidationException("Название не может быть пустым");
         }
-    }
-
-    @Override
-    public void findLikeFilmById(Integer id, Integer userId) {
-    }
-
-    @Override
-    public void removeLikeFilmById(Integer id, Integer userId) {
-    }
-
-    @Override
-    public Collection<Film> getFilmPopularByCount(Integer count) {
-        return null;
+        if (film.getReleaseDate().isBefore(DATE_FIRST_MOVIE)) {
+            log.error("Запись фильма не удалась, дата релиза до 28-12-1895 ");
+            throw new ValidationException("Дата релиза — не раньше 28 декабря 1895 года");
+        }
+        if (film.getDescription().length() <= 0 || film.getDescription().length() >= 200) {
+            log.error("Запись фильма не удалась, превышен лимит символов");
+            throw new ValidationException("Максимальная длина описания — 200 символов");
+        }
+        if (film.getDuration() < 0) {
+            log.error("Запись фильма не удалась, отрицательная продолжительность фильма");
+            throw new ValidationException("Продолжительность фильма должна быть положительной");
+        }
+        if (film.getMpa() == null) {
+            log.error("Запись фильма не удалась, ошибка mpa");
+            throw new ValidationException("ошибка mpa");
+        }
+        return film;
     }
 }
 

@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -12,6 +11,10 @@ import java.util.Collection;
 
 @Component
 public class FilmGenresDbStorage {
+    private final String FILM_GENRES_MERGE_SQL = "MERGE INTO FILM_GENRES KEY (film_id, genre_id) VALUES (?, ?)";
+    private final String FILM_GENRES_GET_SQL = "SELECT * FROM FILM_GENRES fg LEFT JOIN GENRES g ON" +
+            " fg.genre_id = g.id WHERE fg.film_id=? ORDER BY g.id";
+    private final String FILM_GENRES_DELETE_SQL = "DELETE FROM FILM_GENRES WHERE film_id=?";
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
@@ -20,14 +23,11 @@ public class FilmGenresDbStorage {
     }
 
     public void create(int id, int genreId) {
-        String sqlQuery = "MERGE INTO FILM_GENRES KEY (film_id, genre_id) VALUES (?, ?)";
-        jdbcTemplate.update(sqlQuery, id, genreId);
+        jdbcTemplate.update(FILM_GENRES_MERGE_SQL, id, genreId);
     }
 
     public Collection<Genre> getGenres(int id) {
-        String sql = "SELECT * FROM FILM_GENRES fg LEFT JOIN GENRES g ON fg.genre_id = g.id " +
-                "WHERE fg.film_id=? ORDER BY g.id";
-        Collection<Genre> genres = jdbcTemplate.query(sql, this::makeGenre, id);
+        Collection<Genre> genres = jdbcTemplate.query(FILM_GENRES_GET_SQL, this::makeGenre, id);
         if (genres.isEmpty()) {
             return null;
         } else {
@@ -43,7 +43,6 @@ public class FilmGenresDbStorage {
     }
 
     public void remove(int id) {
-        String sqlQuery = "DELETE FROM FILM_GENRES WHERE film_id=?";
-        jdbcTemplate.update(sqlQuery, id);
+        jdbcTemplate.update(FILM_GENRES_DELETE_SQL, id);
     }
 }

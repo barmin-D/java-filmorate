@@ -22,7 +22,19 @@ import java.util.*;
 @Component("FilmDbStorage")
 public class FilmDbStorage implements FilmStorage {
     private static int idCounter = 1;
-    private final LocalDate LOCAL_DATA_START = LocalDate.of(1895, 12, 28);
+    private final LocalDate DATE_FIRST_MOVIE = LocalDate.of(1895, 12, 28);
+    private final String FILM_REQUEST_SQL = "SELECT * FROM FILMS WHERE id = ?";
+    private final String USER_REQUEST_SQL = "SELECT * FROM USERS WHERE id = ?";
+    private final String FILMS_ALL_SQL = "select * from FILMS";
+    private final String FILM_INSERT_SQL = "INSERT INTO FILMS (name,release_date,description,duration,rate,mpa_id)" +
+            "VALUES(?,?,?,?,?,?)";
+    private final String FILM_UPDATE_SQL = "UPDATE FILMS SET " +
+            "name =?,release_date=?,description=?,duration=?,rate=?,mpa_id=? WHERE id=?";
+    private final String FILM_LIKE_INSERT_SQL = "INSERT INTO FILM_LIKES(film_id,user_id) VALUES (?,?)";
+    private final String FILM_LIKE_DELETE_SQL = "DELETE FROM FILM_LIKES WHERE film_id=? AND user_id=?";
+    private final String FILM_POPULAR_SQL = "SELECT f.id, f.name, f.description, f.release_date, f.duration, f.rate," +
+            " f.mpa_id, COUNT(fl.film_id) popular FROM FILMS f LEFT JOIN FILM_LIKES fl ON f.id=fl.film_id " +
+            "GROUP BY f.id ORDER BY popular DESC LIMIT ?";
     private final Logger log = LoggerFactory.getLogger(FilmDbStorage.class);
     private final JdbcTemplate jdbcTemplate;
     private final UserStorage userStorage;
@@ -48,8 +60,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Collection<Film> findAll() {
-        String sql = "select * from FILMS";
-        return jdbcTemplate.query(sql, this::makeFilm);
+        return jdbcTemplate.query(FILMS_ALL_SQL, this::makeFilm);
     }
 
     private Film makeFilm(ResultSet rs, int rowNum) throws SQLException {
@@ -60,38 +71,17 @@ public class FilmDbStorage implements FilmStorage {
                 .description(rs.getString("description"))
                 .duration(rs.getInt("duration"))
                 .rate(rs.getInt("rate"))
-                .mpa(mpaStorage.findMpaById(rs.getInt("mpa_id")).get())
+                .mpa(mpaStorage.getMpaById(rs.getInt("mpa_id")).get())
                 .genres(filmGenresDbStorage.getGenres(rs.getInt("id")))
                 .build();
     }
 
     @Override
     public Film create(Film film) {
-        if (film.getName().length() == 0) {
-            log.error("Запись фильма не удалась, пустое название");
-            throw new ValidationException("Название не может быть пустым");
-        }
-        if (film.getReleaseDate().isBefore(LOCAL_DATA_START)) {
-            log.error("Запись фильма не удалась, дата релиза до 28-12-1895 ");
-            throw new ValidationException("Дата релиза — не раньше 28 декабря 1895 года");
-        }
-        if (film.getDescription().length() <= 0 || film.getDescription().length() >= 200) {
-            log.error("Запись фильма не удалась, превышен лимит символов");
-            throw new ValidationException("Максимальная длина описания — 200 символов");
-        }
-        if (film.getDuration() < 0) {
-            log.error("Запись фильма не удалась, отрицательная продолжительность фильма");
-            throw new ValidationException("Продолжительность фильма должна быть положительной");
-        }
-        if (film.getMpa() == null) {
-            log.error("Запись фильма не удалась, ошибка mpa");
-            throw new ValidationException("ошибка mpa");
-        }
+        validateFilm(film);
         film.setId(getIdCounter());
         log.debug("фильм записан");
-        String sqlQuery = "INSERT INTO FILMS (name,release_date,description,duration,rate,mpa_id)" +
-                "VALUES(?,?,?,?,?,?)";
-        jdbcTemplate.update(sqlQuery,
+        jdbcTemplate.update(FILM_INSERT_SQL,
                 film.getName(),
                 film.getReleaseDate(),
                 film.getDescription(),
@@ -108,29 +98,11 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film update(Film film) {
-        SqlRowSet filmRows = jdbcTemplate.queryForRowSet("SELECT * FROM FILMS WHERE id = ?", film.getId());
+        SqlRowSet filmRows = jdbcTemplate.queryForRowSet(FILM_REQUEST_SQL, film.getId());
         if (filmRows.next()) {
-            if (film.getName().length() == 0) {
-                log.error("Запись фильма не удалась, пустое название");
-                throw new ValidationException("Название не может быть пустым");
-            }
-            if (film.getReleaseDate().isBefore(LOCAL_DATA_START)) {
-                log.error("Запись фильма не удалась, дата релиза до 28-12-1895 ");
-                throw new ValidationException("Дата релиза — не раньше 28 декабря 1895 года");
-            }
-            if (film.getDescription().length() <= 0 || film.getDescription().length() >= 200) {
-                log.error("Запись фильма не удалась, превышен лимит символов");
-                throw new ValidationException("Максимальная длина описания — 200 символов");
-            }
-            if (film.getDuration() < 0) {
-                log.error("Запись фильма не удалась, отрицательная продолжительность фильма");
-                throw new ValidationException("Продолжительность фильма должна быть положительной");
-            }
+            validateFilm(film);
             log.debug("фильм перезаписан");
-            String sqlQuery = "UPDATE FILMS SET " +
-                    "name =?,release_date=?,description=?,duration=?,rate=?,mpa_id=?" +
-                    "WHERE id=?";
-            jdbcTemplate.update(sqlQuery,
+            jdbcTemplate.update(FILM_UPDATE_SQL,
                     film.getName(),
                     film.getReleaseDate(),
                     film.getDescription(),
@@ -156,28 +128,49 @@ public class FilmDbStorage implements FilmStorage {
         }
     }
 
+    private void validateFilm(Film film) {
+        if (film.getName().length() == 0) {
+            log.error("Запись фильма не удалась, пустое название");
+            throw new ValidationException("Название не может быть пустым");
+        }
+        if (film.getReleaseDate().isBefore(DATE_FIRST_MOVIE)) {
+            log.error("Запись фильма не удалась, дата релиза до 28-12-1895 ");
+            throw new ValidationException("Дата релиза — не раньше 28 декабря 1895 года");
+        }
+        if (film.getDescription().length() <= 0 || film.getDescription().length() >= 200) {
+            log.error("Запись фильма не удалась, превышен лимит символов");
+            throw new ValidationException("Максимальная длина описания — 200 символов");
+        }
+        if (film.getDuration() < 0) {
+            log.error("Запись фильма не удалась, отрицательная продолжительность фильма");
+            throw new ValidationException("Продолжительность фильма должна быть положительной");
+        }
+        if (film.getMpa() == null) {
+            log.error("Запись фильма не удалась, ошибка mpa");
+            throw new ValidationException("ошибка mpa");
+        }
+    }
+
     @Override
-    public Optional<Film> findFilmById(Integer filmId) {
-        SqlRowSet filmRows = jdbcTemplate.queryForRowSet("SELECT * FROM FILMS WHERE id = ?", filmId);
+    public Optional<Film> getFilmById(Integer filmId) {
+        SqlRowSet filmRows = jdbcTemplate.queryForRowSet(FILM_REQUEST_SQL, filmId);
         if (filmRows.next()) {
             log.info("Найден фильм: {} {}", filmRows.getString("id"), filmRows.getString("name"));
-            String sql = "SELECT * FROM FILMS WHERE id = ?";
-            return Optional.of(jdbcTemplate.queryForObject(sql, this::makeFilm, filmId));
+            return Optional.of(jdbcTemplate.queryForObject(FILM_REQUEST_SQL, this::makeFilm, filmId));
         } else {
-            log.info("Фильм с идентификатором {} не найден.", filmId);
+            log.error("Фильм с идентификатором {} не найден.", filmId);
             throw new FilmNotFoundException("Такого фильма нет");
         }
     }
 
     @Override
-    public void findLikeFilmById(Integer id, Integer userId) {
-        SqlRowSet filmRows = jdbcTemplate.queryForRowSet("SELECT * FROM FILMS WHERE id = ?", id);
+    public void putLikeFilmById(Integer id, Integer userId) {
+        SqlRowSet filmRows = jdbcTemplate.queryForRowSet(FILM_REQUEST_SQL, id);
         if (filmRows.next()) {
-            SqlRowSet userRows = jdbcTemplate.queryForRowSet("SELECT * FROM USERS WHERE id = ?", userId);
+            SqlRowSet userRows = jdbcTemplate.queryForRowSet(USER_REQUEST_SQL, userId);
             if (userRows.next()) {
                 log.debug("Пользователь поставил лайк");
-                String sqlQuery = "INSERT INTO FILM_LIKES(film_id,user_id) VALUES (?,?)";
-                jdbcTemplate.update(sqlQuery, id, userId);
+                jdbcTemplate.update(FILM_LIKE_INSERT_SQL, id, userId);
             } else {
                 throw new UserNotFoundException(String.format("Пользователь %s не найден", userId));
             }
@@ -188,13 +181,12 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public void removeLikeFilmById(Integer id, Integer userId) {
-        SqlRowSet filmRows = jdbcTemplate.queryForRowSet("SELECT * FROM FILMS WHERE id = ?", id);
+        SqlRowSet filmRows = jdbcTemplate.queryForRowSet(FILM_REQUEST_SQL, id);
         if (filmRows.next()) {
-            SqlRowSet userRows = jdbcTemplate.queryForRowSet("SELECT * FROM USERS WHERE id = ?", userId);
+            SqlRowSet userRows = jdbcTemplate.queryForRowSet(USER_REQUEST_SQL, userId);
             if (userRows.next()) {
                 log.debug("Пользователь удалил лайк");
-                String sqlQuery = "DELETE FROM FILM_LIKES WHERE film_id=? AND user_id=?";
-                jdbcTemplate.update(sqlQuery, id, userId);
+                jdbcTemplate.update(FILM_LIKE_DELETE_SQL, id, userId);
             } else {
                 throw new UserNotFoundException(String.format("Пользователь %s не найден", userId));
             }
@@ -206,15 +198,10 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Collection<Film> getFilmPopularByCount(Integer count) {
         if (count == null) {
-            String sql = "SELECT f.id, f.name, f.description, f.release_date, f.duration, f.rate, f.mpa_id," +
-                    " COUNT(fl.film_id) popular FROM FILMS f LEFT JOIN FILM_LIKES fl ON f.id=fl.film_id " +
-                    "GROUP BY f.id ORDER BY popular DESC LIMIT 10";
-            return jdbcTemplate.query(sql, this::makeFilm);
+            count = 10;
+            return jdbcTemplate.query(FILM_POPULAR_SQL, this::makeFilm, count);
         } else {
-            String sql = "SELECT f.id, f.name, f.description, f.release_date, f.duration, f.rate, f.mpa_id," +
-                    " COUNT(fl.film_id) popular FROM FILMS f LEFT JOIN FILM_LIKES fl ON f.id=fl.film_id " +
-                    "GROUP BY f.id ORDER BY popular DESC LIMIT ?";
-            return jdbcTemplate.query(sql, this::makeFilm, count);
+            return jdbcTemplate.query(FILM_POPULAR_SQL, this::makeFilm, count);
         }
     }
 }

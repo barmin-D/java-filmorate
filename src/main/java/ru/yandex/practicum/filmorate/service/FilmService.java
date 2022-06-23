@@ -27,12 +27,12 @@ public class FilmService {
         return filmStorage;
     }
 
-    public Optional<Film> findFilmById(Integer filmId) {
-        return filmStorage.findFilmById(filmId);
+    public Optional<Film> getFilmById(Integer filmId) {
+        return filmStorage.getFilmById(filmId);
     }
 
-    public void findLikeFilmById(Integer id, Integer userId) {
-        filmStorage.findLikeFilmById(id, userId);
+    public void putLikeFilmById(Integer id, Integer userId) {
+        filmStorage.putLikeFilmById(id, userId);
     }
 
     public void removeLikeFilmById(Integer id, Integer userId) {

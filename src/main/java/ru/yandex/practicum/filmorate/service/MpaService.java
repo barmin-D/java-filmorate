@@ -21,7 +21,7 @@ public class MpaService {
         return mpaStorage.findAllMpa();
     }
 
-    public Optional<Mpa> findMpaById(Integer mpaId) {
-        return mpaStorage.findMpaById(mpaId);
+    public Optional<Mpa> getMpaById(Integer mpaId) {
+        return mpaStorage.getMpaById(mpaId);
     }
 }

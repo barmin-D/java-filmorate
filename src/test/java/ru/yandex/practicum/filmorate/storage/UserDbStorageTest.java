@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 class UserDbStorageTest {
     private final UserDbStorage userDbStorage;
-    User user;
+    private User user;
 
     @Test
     public void testFindUserById() {
